@@ -1,0 +1,189 @@
+
+package homework300;
+import java.awt.*;
+import java.io.*;
+import java.util.*;
+
+import javax.swing.*;
+
+public class LoginPageHashmap extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	
+	private HashMap<String,String> accounts = new HashMap<String,String>();
+	
+	private JTextField usernameField;
+	private JPasswordField passwordField;
+	
+	private String filePath = "src/SENGWeek10/accounts.txt";
+	
+	//Constructor
+	public LoginPageHashmap() {
+		
+		loadAccounts();
+		setupWindow();
+		
+		JPanel formPanel = createFormPanel();
+		JPanel buttonPanel = createButtonPanel();
+		
+		add(buttonPanel,BorderLayout.SOUTH);
+		add(formPanel,BorderLayout.CENTER);
+		
+		setVisible(true);
+
+	}
+	
+	private void login() {
+		String username = usernameField.getText().trim();
+		String password =  new String(passwordField.getPassword());
+		
+		if(username.isEmpty() || password.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Enter both username and password");
+		
+			return;
+		}
+		
+		
+		 
+		if(accounts.containsKey(username) && accounts.get(username).equals(password)) {
+			JOptionPane.showMessageDialog(this, "login succesfull! Welcome, " + username + " ." );
+		
+		usernameField.setText("");
+		passwordField.setText("");
+		}
+		
+		else {
+			JOptionPane.showMessageDialog(this, "Incorect username or password");
+			passwordField.setText("");
+		}
+		
+	}	
+	
+	private void createAccount() {
+		String username = usernameField.getText().trim();
+		String password =  new String(passwordField.getPassword());
+		
+		if(username.isEmpty() || password.isEmpty()) {
+			JOptionPane.showMessageDialog(this, "Enter username and password");
+			return;
+		}
+		
+		if(accounts.containsKey(username)) {
+			JOptionPane.showMessageDialog(this, "username already exist.");
+			return;
+		}
+		
+		try {
+			FileWriter fileWriter = new FileWriter(filePath,true);
+			PrintWriter printWriter = new PrintWriter(fileWriter);
+			printWriter.println(username + "," + password);
+			printWriter.close();
+			
+			accounts.put(username, password);
+		}
+		catch(IOException e){
+			JOptionPane.showMessageDialog(  this, "The account could not be saved.");
+		}
+	}
+	
+	private JPanel createButtonPanel() {
+		
+		JPanel buttonPanel = new JPanel();
+		JButton loginButton = new JButton("Login button");
+		JButton createButton = new JButton("Create Account");
+		
+		buttonPanel.add(loginButton);
+		buttonPanel.add(createButton);
+		
+		loginButton.addActionListener(event -> {login(); });
+		createButton.addActionListener(event -> {createAccount(); });
+		
+		
+		return buttonPanel;
+		
+	}
+
+	
+	private void setupWindow() {
+		setTitle("Account Login");
+		setSize(400,220);
+		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+		setLayout(new BorderLayout());
+		
+	}
+
+
+	//For reading from accounts from accounts.txt
+	private void loadAccounts() {
+		File file = new File(filePath);
+		
+		if(!file.exists()) {
+			try {
+				file.createNewFile();
+			}
+			catch(IOException e){
+				System.out.print("Couldn't create account file");
+			} 
+			return;
+		}
+		
+		try {
+			Scanner fileScanner = new Scanner(file);
+			
+			while(fileScanner.hasNextLine()) {
+				String line = fileScanner.nextLine().trim();
+				
+				if(line.isEmpty()) {
+					continue;
+				}
+				
+				//split name with password with comma username,password
+				String[] account = line.split(",",2);
+				if(account.length == 2) {
+					
+					String username = account[0].trim();
+					String password = account[1].trim();
+					accounts.put(username, password);
+					
+					//forarraylists
+					//usernames.add(account[0].trim());
+					//passwords.add(account[1].trim());
+				}
+			}
+			
+			fileScanner.close();
+			
+		}
+		catch(IOException e){
+			JOptionPane.showMessageDialog(this, "Couldn't read accounts file.");
+		}
+		
+	}
+
+	private JPanel createFormPanel() {
+		
+		JPanel formPanel = new JPanel(new GridLayout(2,2,10,10));
+		formPanel.setBorder(BorderFactory.createEmptyBorder(25,25,10,25));
+		
+		usernameField = new JTextField();
+		passwordField = new JPasswordField();
+		
+		formPanel.add(new JLabel("Username: "));
+		formPanel.add(usernameField);
+		formPanel.add(new JLabel("Password: "));
+		formPanel.add(passwordField);
+		return formPanel;
+		
+	}
+
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(() -> {new LoginPageArraylist();});
+		
+		
+		//System.out.println();
+		
+	}
+	
+}
